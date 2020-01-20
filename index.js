@@ -26,25 +26,28 @@ UserSchema.loadClass(UserDocument);
 
 const User = mongoose.model("User", UserSchema);
 
-console.log('User1');
 
 mongoose.connect('mongodb://example:example@localhost:27017/example', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
-console.log('User2');
-
 async function run() {
-  console.log('User3');
-  const createdUser = await User.create({
+  const user = await User({
     name: 'name',
     password: 'password',
     createdAt: new Date(),
     updatedAt: new Date()
   });
-  console.log('User4');
-  console.log(createdUser);
+  console.log(`user.isNew ${user.isNew}`);
+  await user.save();
+  console.log(`user.isNew ${user.isNew}`);
+
+  const jsonOfUser = await user.toJSON();
+  const hydratedUser = User.hydrate(jsonOfUser);
+  console.log(`hydratedUser.isNew ${hydratedUser.isNew}`);
+  await hydratedUser.save();
+  console.log(`hydratedUser.isNew ${hydratedUser.isNew}`);
 }
 
 run().then(() => {
