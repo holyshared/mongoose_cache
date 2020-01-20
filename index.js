@@ -1,30 +1,7 @@
 const mongoose = require('mongoose');
+const models = require('./models');
 
-const UserSchema = mongoose.Schema({
-  name: {
-    type: String,
-  },
-  password: {
-    type: String,
-    require: true,
-    select: false,
-  },
-  createdAt: {
-    type: Date,
-    require: true,
-  },
-  updatedAt: {
-    type: Date,
-    require: true,
-  },
-});
-
-class UserDocument {
-}
-
-UserSchema.loadClass(UserDocument);
-
-const User = mongoose.model("User", UserSchema);
+const User = models.User;
 
 
 mongoose.connect('mongodb://example:example@localhost:27017/example', {
