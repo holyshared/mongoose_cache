@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const models = require('./models');
+const cache = require('./cache');
 
 const User = models.User;
 
@@ -25,6 +26,12 @@ async function run() {
   console.log(`hydratedUser.isNew ${hydratedUser.isNew}`);
   await hydratedUser.save();
   console.log(`hydratedUser.isNew ${hydratedUser.isNew}`);
+
+
+  const userFromCache = await cache.retributeUser(jsonOfUser._id);
+  console.log(`userFromCache.isNew ${userFromCache.isNew}`);
+
+
 }
 
 run().then(() => {
