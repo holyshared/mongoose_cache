@@ -23,11 +23,11 @@ const redisCache = {
 
 
 const cacheResolve = (cacheStorage, options) => {
-  const { resolve, serialize, deserialize, cacheSeconds } = options;
+  const { cacheKey, resolve, serialize, deserialize, cacheSeconds } = options;
 
   const fetchAndCache = async (id) => {
     const data = await resolve(id);
-    cacheStorage.set(id, {
+    cacheStorage.set(cacheKey(id), {
       data: serialize(data),
       cacheSeconds
     });
@@ -35,11 +35,13 @@ const cacheResolve = (cacheStorage, options) => {
   };
 
   return async (id) => {
-    const cache = await cacheStorage.get(id);
+    const cache = await cacheStorage.get(cacheKey(id));
 
     if (!cache) {
+      console.log('retribute from database');
       return fetchAndCache(id);
     }
+    console.log('retribute from cache');
 
     return deserialize(cache);
   };
@@ -51,6 +53,7 @@ const cacheResolve = (cacheStorage, options) => {
 exports.retributeUser = cacheResolve(
   redisCache.users,
   {
+    cacheKey: (user) => `web-user-${user._id}`,
     resolve: async (id) => User.findById(id),
     serialize: (user) => user.toJSON(),
     deserialize: (user) => {
