@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const models = require('./models');
 const cache = require('./cache');
+const cacheClient = require('./redis').cacheClient;
 
 const User = models.User;
 
@@ -22,15 +23,19 @@ async function run() {
   console.log(`user.isNew ${user.isNew}`);
 
   const jsonOfUser = await user.toJSON();
-  const hydratedUser = User.hydrate(jsonOfUser);
+  const fixIdJsonOfUser = { ...jsonOfUser, _id: jsonOfUser.id };
+
+  const hydratedUser = User.hydrate(fixIdJsonOfUser);
   console.log(`hydratedUser.isNew ${hydratedUser.isNew}`);
   await hydratedUser.save();
   console.log(`hydratedUser.isNew ${hydratedUser.isNew}`);
 
+  cacheClient.flushall();
+  const userFromMongodb = await cache.retributeUser(jsonOfUser.id);
+  console.log(`userFromCache.isNew ${userFromMongodb.isNew}`);
 
-  const userFromCache = await cache.retributeUser(jsonOfUser._id);
+  const userFromCache = await cache.retributeUser(jsonOfUser.id);
   console.log(`userFromCache.isNew ${userFromCache.isNew}`);
-
 
 }
 

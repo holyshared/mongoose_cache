@@ -1,9 +1,24 @@
 const models = require('./models');
+const cacheClient = require('./redis').cacheClient;
 
 const User = models.User;
 
-const memoryCache = {
-  users: new Map()
+const redisCache = {
+  users: {
+    set: (id, payload) => {
+      cacheClient.set(id.toString(), JSON.stringify(payload.data), 'EX', payload.cacheSeconds);
+    },
+    get: async (id) => {
+      return new Promise((resolve, reject) => {
+        cacheClient.get(id.toString(), (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(JSON.parse(data));
+        });
+      });
+    }
+  }
 };
 
 
@@ -14,23 +29,19 @@ const cacheResolve = (cacheStorage, options) => {
     const data = await resolve(id);
     cacheStorage.set(id, {
       data: serialize(data),
-      expireAt: (new Date().getTime() + (cacheSeconds * 10000))
+      cacheSeconds
     });
     return data;
   };
 
   return async (id) => {
-    const cache = cacheStorage.get(id);
-  
+    const cache = await cacheStorage.get(id);
+
     if (!cache) {
       return fetchAndCache(id);
     }
-  
-    if (cache.expireAt < new Date().getTime()) {
-      return fetchAndCache(id);
-    }
-  
-    return deserialize(cache.data);
+
+    return deserialize(cache);
   };
 }
 
@@ -38,11 +49,14 @@ const cacheResolve = (cacheStorage, options) => {
 
 
 exports.retributeUser = cacheResolve(
-  memoryCache.users,
+  redisCache.users,
   {
     resolve: async (id) => User.findById(id),
     serialize: (user) => user.toJSON(),
-    deserialize: (user) => User.hydrate(user),
+    deserialize: (user) => {
+      const { id: _id } = user;
+      return User.hydrate({ ...user, _id });
+    },
     cacheSeconds: 60
   }
 );

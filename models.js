@@ -17,6 +17,16 @@ const UserSchema = mongoose.Schema({
     type: Date,
     require: true,
   },
+}, {
+  toJSON: {
+    getters: true,
+    versionKey: false,
+    transform: (_doc, ret, _) => {
+      ret.id = ret._id;
+      delete ret._id;
+      return ret;
+    },    
+  }
 });
 
 class UserDocument {

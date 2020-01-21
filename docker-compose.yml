@@ -12,3 +12,7 @@ services:
     volumes:
       - /tmp/mongo/data:/data/db
       - ./docker/mongo/init/:/docker-entrypoint-initdb.d/
+  redis:
+    image: redis:3.2.6
+    ports:
+      - 127.0.0.1:6379:6379
