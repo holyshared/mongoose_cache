@@ -1,3 +1,3 @@
-const redis = require('redis');
+const Redis = require('ioredis');
 
-exports.cacheClient = redis.createClient('redis://127.0.0.1:6379');
+exports.cacheClient = new Redis('redis://127.0.0.1:6379');

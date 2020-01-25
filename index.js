@@ -41,6 +41,8 @@ async function run() {
 
 run().then(() => {
   console.log('done');
+  process.exit();
 }).catch(err => {
   console.log(err);
+  process.exit(-1);
 });

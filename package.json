@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/holyshared/mongoose_cache#readme",
   "dependencies": {
-    "mongoose": "^5.8.9",
-    "redis": "^2.8.0"
+    "ioredis": "^4.14.1",
+    "mongoose": "^5.8.9"
   }
 }
